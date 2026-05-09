@@ -32,3 +32,6 @@ migrate-down:
 
 migrate-action:
 	@if (-not '$(action)') { Write-Host 'Action parameter is required'; exit 1 }; docker compose run --rm todoapp-postgres-migrate -path /migrations "-database" "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@todoapp-postgres:5432/${POSTGRES_DB}?sslmode=disable" $(action)
+
+todoapp-run:
+	@go run cmd/todoapp/main.go
