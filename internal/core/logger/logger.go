@@ -1,6 +1,7 @@
 package core_logger
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -15,6 +16,15 @@ type Logger struct {
 	file *os.File
 }
 
+func FromContext(ctx context.Context) *Logger {
+	log, ok := ctx.Value("log").(*Logger)
+	if !ok {
+		panic("no logger in context")
+	}
+
+	return log
+}
+
 func NewLogger(config Config) (*Logger, error) {
 	zaplvl := zap.NewAtomicLevel()
 	if err := zaplvl.UnmarshalText([]byte(config.Level)); err != nil {
@@ -25,7 +35,7 @@ func NewLogger(config Config) (*Logger, error) {
 		return nil, fmt.Errorf("Mkdir logfolder: %w", err)
 	}
 
-	timestamp := time.Now().UTC().Format("2026-01-02T15-04-05.000000")
+	timestamp := time.Now().UTC().Format("2006-01-02T15-04-05.000000")
 	logfilePath := filepath.Join(
 		config.Folder, fmt.Sprintf("%s.log", timestamp),
 	)
@@ -36,7 +46,7 @@ func NewLogger(config Config) (*Logger, error) {
 	}
 
 	zapconfig := zap.NewDevelopmentEncoderConfig()
-	zapconfig.EncodeTime = zapcore.TimeEncoderOfLayout("2026-01-02T15-04-05.000000")
+	zapconfig.EncodeTime = zapcore.TimeEncoderOfLayout("2006-01-02T15-04-05.000000")
 
 	zapEncoder := zapcore.NewConsoleEncoder(zapconfig)
 
@@ -53,5 +63,12 @@ func NewLogger(config Config) (*Logger, error) {
 func (l *Logger) Close() {
 	if err := l.file.Close(); err != nil {
 		fmt.Println("Failed to close application logger: ", err)
+	}
+}
+
+func (l *Logger) With(field ...zap.Field) *Logger {
+	return &Logger{
+		Logger: l.Logger.With(field...),
+		file:   l.file,
 	}
 }
