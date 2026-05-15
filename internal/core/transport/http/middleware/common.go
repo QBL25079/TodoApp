@@ -6,7 +6,7 @@ import (
 	"time"
 
 	core_logger "github.com/QBL25079/TodoApp/internal/core/logger"
-	core_http_response "github.com/QBL25079/TodoApp/internal/core/transport/http/middleware/response"
+	core_http_response "github.com/QBL25079/TodoApp/internal/core/transport/http/response"
 
 	"github.com/google/uuid"
 	"go.uber.org/zap"

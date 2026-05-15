@@ -2,33 +2,37 @@ package core_http_server
 
 import (
 	"context"
-	"fmt"
 	"errors"
+	"fmt"
 	"net/http"
-	"go.uber.org/zap"
+
 	core_logger "github.com/QBL25079/TodoApp/internal/core/logger"
+	core_http_middleware "github.com/QBL25079/TodoApp/internal/core/transport/http/middleware"
+	"go.uber.org/zap"
 )
 
 type HTTPSever struct {
-	mux *http.ServeMux
-	config Config
-	log core_logger.Logger
+	mux        *http.ServeMux
+	config     Config
+	log        *core_logger.Logger
+	middleware []core_http_middleware.Middleware
 }
 
-
-func NewHTTPServer(config Config, log core_logger.Logger) *HTTPSever {
-	return &HTTPSever{mux: http.NewServeMux(), config: config, log: log}
+func NewHTTPServer(config Config, log *core_logger.Logger, middleware ...core_http_middleware.Middleware) *HTTPSever {
+	return &HTTPSever{mux: http.NewServeMux(), config: config, log: log, middleware: middleware}
 }
 
 func (h *HTTPSever) Run(ctx context.Context) error {
-	server := &http.Server{Addr: h.config.Addr, Handler: h.mux}
+	mux := core_http_middleware.ChainMiddleware(h.mux, h.middleware...)
+
+	server := &http.Server{Addr: h.config.Addr, Handler: mux}
 
 	ch := make(chan error, 1)
 
 	go func() {
 		defer close(ch)
 
-		h.log.Warn("Start HTTP server", zap.String("addr: ", h.config.Addr))
+		h.log.Info("Start HTTP server", zap.String("addr", h.config.Addr))
 
 		err := server.ListenAndServe()
 		if errors.Is(err, http.ErrServerClosed) {
@@ -42,7 +46,7 @@ func (h *HTTPSever) Run(ctx context.Context) error {
 			return fmt.Errorf("ListenAndServe HTTP: %w", err)
 		}
 	case <-ctx.Done():
-		h.log.Warn("shutdown http server...")
+		h.log.Info("shutdown http server...")
 
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), h.config.ShutdownTimeout)
 		defer cancel()
@@ -52,8 +56,16 @@ func (h *HTTPSever) Run(ctx context.Context) error {
 
 			return fmt.Errorf("shutdown HTTP server: %w", err)
 		}
-		h.log.Warn("HTTP server stopped")
+		h.log.Info("HTTP server stopped")
 
 	}
 	return nil
+}
+
+func (h *HTTPSever) RegisterAPIRouters(routers ...*APIVersionRouter) {
+	for _, router := range routers {
+		prefix := "/api" + string(router.apiVersion)
+
+		h.mux.Handle(prefix+"/", http.StripPrefix(prefix, router))
+	}
 }
