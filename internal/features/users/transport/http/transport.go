@@ -1,8 +1,10 @@
 package user_transport_http
 
 import (
+	"context"
 	"net/http"
 
+	"github.com/QBL25079/TodoApp/internal/core/domain"
 	core_http_server "github.com/QBL25079/TodoApp/internal/core/transport/http/server"
 )
 
@@ -11,6 +13,7 @@ type UsersHTTPHandler struct {
 }
 
 type UsersService interface {
+	CreateUser(ctx context.Context, user domain.User) (domain.User, error)  
 }
 
 func NewUsersHTTPHandler(usersService UsersService) *UsersHTTPHandler {

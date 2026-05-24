@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/QBL25079/TodoApp/internal/core/domain"
 	core_logger "github.com/QBL25079/TodoApp/internal/core/logger"
 )
 
 // dto for creating user request
 type CreateUserRequest struct {
-	FullName    string  `json:"full_name"`
-	PhoneNumber *string `json:"phone_number"`
+	FullName    string  `json:"full_name" validate:"required, min=3, max=100"`
+	PhoneNumber *string `json:"phone_number" validate:"omitempty, min=10, max=15, startswith=+"`
 }
 
 // dto for creating user response
@@ -30,4 +31,8 @@ func (h *UsersHTTPHandler) CreateUser(rw http.ResponseWriter, r *http.Request) {
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 
 	}
+
+
 }
+
+
