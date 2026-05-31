@@ -8,9 +8,12 @@ import (
 	"syscall"
 
 	core_logger "github.com/QBL25079/TodoApp/internal/core/logger"
+	core_postgres_pool "github.com/QBL25079/TodoApp/internal/core/repository/postgres/pool"
 	core_http_middleware "github.com/QBL25079/TodoApp/internal/core/transport/http/middleware"
 	core_http_server "github.com/QBL25079/TodoApp/internal/core/transport/http/server"
+	users_postgres_repo "github.com/QBL25079/TodoApp/internal/features/users/repository/postgres"
 	user_transport_http "github.com/QBL25079/TodoApp/internal/features/users/transport/http"
+	user_service "github.com/QBL25079/TodoApp/internal/features/users/service"
 	"go.uber.org/zap"
 )
 
@@ -27,17 +30,26 @@ func main() {
 
 	defer logger.Close()
 
-	logger.Debug("Starting to do app")
+	logger.Debug("initializing connection pool")
+	pool, err := core_postgres_pool.NewConnectionPool(ctx, core_postgres_pool.NewConfigMust())
+	if err != nil {
+		logger.Fatal("failed to init postgres connection pool", zap.Error(err)) 
+	}
 
-	usersTransportHTTP := user_transport_http.NewUsersHTTPHandler(nil)
+	defer pool.Close()
 
-	userRoutes := usersTransportHTTP.Routes()
+	logger.Debug("Initializing feature ", zap.String("feature", "users"))
+	usersRepository := users_postgres_repo.NewUsersRepository(pool)
+	userService := user_service.NewUserService(usersRepository)
+	usersTransportHTTP := user_transport_http.NewUsersHTTPHandler(userService)
+
+	logger.Debug("initializing HTTP server")
+
+	httpServer := core_http_server.NewHTTPServer(core_http_server.NewConfigMust(), logger, core_http_middleware.RequestID(), core_http_middleware.Logger(logger), core_http_middleware.Panic(), core_http_middleware.Trace())
 
 	apiVersionRouter := core_http_server.NewApiVersionRouter(core_http_server.ApiVersion1)
 
-	apiVersionRouter.RegisterRoutes(userRoutes...)
-
-	httpServer := core_http_server.NewHTTPServer(core_http_server.NewConfigMust(), logger, core_http_middleware.RequestID(), core_http_middleware.Logger(logger), core_http_middleware.Panic(), core_http_middleware.Trace())
+	apiVersionRouter.RegisterRoutes(usersTransportHTTP.Routes()...)
 
 	httpServer.RegisterAPIRouters(apiVersionRouter)
 

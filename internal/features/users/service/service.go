@@ -17,3 +17,7 @@ type UsersRepository interface {
 func NewUsersRepository(usersRepository UsersRepository) *UsersService {
 	return &UsersService{usersRepository: usersRepository}
 }
+
+func NewUserService(userRepository UsersRepository) *UsersService {
+	return &UsersService{usersRepository: userRepository}
+}

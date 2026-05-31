@@ -71,7 +71,7 @@ func Trace() Middleware {
 			rw := core_http_response.NewResponseWriter(w)
 			log.Debug(">>> incoming HTTP request", zap.Time("time", time.Now().UTC()))
 
-			next.ServeHTTP(w, r)
+			next.ServeHTTP(rw, r)
 
 			log.Debug("<<< done HTTP request", zap.Int("status_code", rw.GetStatusCodeOrPanic()), zap.Duration("latency", time.Since(before)))
 		})
