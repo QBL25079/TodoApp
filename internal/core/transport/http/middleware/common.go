@@ -69,7 +69,7 @@ func Trace() Middleware {
 			log := core_logger.FromContext(ctx)
 			before := time.Now()
 			rw := core_http_response.NewResponseWriter(w)
-			log.Debug(">>> incoming HTTP request", zap.Time("time", time.Now().UTC()))
+			log.Debug(">>> incoming HTTP request", zap.String("http_method", r.Method), zap.Time("time", time.Now().UTC()))
 
 			next.ServeHTTP(rw, r)
 
