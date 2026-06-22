@@ -5,10 +5,10 @@ import (
 
 	"github.com/QBL25079/TodoApp/internal/core/domain"
 	core_logger "github.com/QBL25079/TodoApp/internal/core/logger"
-	core_http_reqpuest "github.com/QBL25079/TodoApp/internal/core/transport/http/decode"
+	core_http_request "github.com/QBL25079/TodoApp/internal/core/transport/http/request"
+	core_http_utils "github.com/QBL25079/TodoApp/internal/core/transport/http/request"
 	core_http_response "github.com/QBL25079/TodoApp/internal/core/transport/http/response"
 	core_http_types "github.com/QBL25079/TodoApp/internal/core/transport/http/types"
-	core_http_utils "github.com/QBL25079/TodoApp/internal/core/transport/http/utils"
 )
 
 type PatchUserRequest struct {
@@ -28,11 +28,10 @@ func (h *UsersHTTPHandler) PatchUser(rw http.ResponseWriter, r *http.Request) {
 		responseHandler.ErrorResponse(err, "Cant get user ID")
 		return
 	}
-	
 
 	var request PatchUserRequest
 
-	if err := core_http_reqpuest.DecodeAndValidateRequest(r, &request); err != nil {
+	if err := core_http_request.DecodeAndValidateRequest(r, &request); err != nil {
 		responseHandler.ErrorResponse(err, "failed to decode and validate request")
 		return
 	}
@@ -44,9 +43,9 @@ func (h *UsersHTTPHandler) PatchUser(rw http.ResponseWriter, r *http.Request) {
 	response := PatchUserResponse(UserDTOFromDomain(userDomain))
 
 	responseHandler.JSONResponse(response, http.StatusOK)
-	
+
 }
 
 func userPatchFromRequest(request PatchUserRequest) domain.UserPatch {
-	return domain.UserPatch{FullName: request.FullName.ToDomain(), PhoneNumber: request.PhoneNumber.ToDomain()}
+	return domain.NewUserPatch(request.FullName.ToDomain(), request.PhoneNumber.ToDomain())
 }

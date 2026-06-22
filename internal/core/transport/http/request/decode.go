@@ -1,4 +1,4 @@
-package core_http_reqpuest
+package core_http_request
 
 import (
 	"encoding/json"

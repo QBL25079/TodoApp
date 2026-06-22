@@ -5,7 +5,7 @@ import (
 
 	core_logger "github.com/QBL25079/TodoApp/internal/core/logger"
 	core_http_response "github.com/QBL25079/TodoApp/internal/core/transport/http/response"
-	core_http_utils "github.com/QBL25079/TodoApp/internal/core/transport/http/utils"
+	core_http_utils "github.com/QBL25079/TodoApp/internal/core/transport/http/request"
 )
 
 type GetUserResponse DTOUserResponse
