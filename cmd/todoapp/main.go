@@ -8,12 +8,12 @@ import (
 	"syscall"
 
 	core_logger "github.com/QBL25079/TodoApp/internal/core/logger"
-	core_postgres_pool "github.com/QBL25079/TodoApp/internal/core/repository/postgres/pool"
+	core_pgx_pool "github.com/QBL25079/TodoApp/internal/core/repository/postgres/pool/pgx"
 	core_http_middleware "github.com/QBL25079/TodoApp/internal/core/transport/http/middleware"
 	core_http_server "github.com/QBL25079/TodoApp/internal/core/transport/http/server"
 	users_postgres_repo "github.com/QBL25079/TodoApp/internal/features/users/repository/postgres"
-	user_transport_http "github.com/QBL25079/TodoApp/internal/features/users/transport/http"
 	user_service "github.com/QBL25079/TodoApp/internal/features/users/service"
+	user_transport_http "github.com/QBL25079/TodoApp/internal/features/users/transport/http"
 	"go.uber.org/zap"
 )
 
@@ -31,7 +31,7 @@ func main() {
 	defer logger.Close()
 
 	logger.Debug("initializing connection pool")
-	pool, err := core_postgres_pool.NewConnectionPool(ctx, core_postgres_pool.NewConfigMust())
+	pool, err := core_pgx_pool.NewPool(ctx, core_pgx_pool.NewConfigMust())
 	if err != nil {
 		logger.Fatal("failed to init postgres connection pool", zap.Error(err)) 
 	}
@@ -45,7 +45,7 @@ func main() {
 
 	logger.Debug("initializing HTTP server")
 
-	httpServer := core_http_server.NewHTTPServer(core_http_server.NewConfigMust(), logger, core_http_middleware.RequestID(), core_http_middleware.Logger(logger), core_http_middleware.Panic(), core_http_middleware.Trace())
+	httpServer := core_http_server.NewHTTPServer(core_http_server.NewConfigMust(), logger, core_http_middleware.RequestID(), core_http_middleware.Logger(logger), core_http_middleware.Trace(), core_http_middleware.Panic(),)
 
 	apiVersionRouter := core_http_server.NewApiVersionRouter(core_http_server.ApiVersion1)
 
