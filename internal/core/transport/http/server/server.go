@@ -62,10 +62,10 @@ func (h *HTTPSever) Run(ctx context.Context) error {
 	return nil
 }
 
-func (h *HTTPSever) RegisterAPIRouters(routers ...*APIVersionRouter) {
+func (s *HTTPSever) RegisterAPIRouters(routers ...*APIVersionRouter) {
 	for _, router := range routers {
 		prefix := "/api" + string(router.apiVersion)
 
-		h.mux.Handle(prefix+"/", http.StripPrefix(prefix, router))
+		s.mux.Handle(prefix+"/", http.StripPrefix(prefix, router.WithMiddleware()))
 	}
 }

@@ -14,6 +14,10 @@ type User struct {
 	PhoneNumber *string
 }
 
+func NewUserPatch(fullName Nullable[string], phoneNumber Nullable[string]) UserPatch {
+	return UserPatch{FullName: fullName, PhoneNumber: phoneNumber}
+}
+
 func NewUser(ID, Version int, FullName string, PhoneNumber *string) User {
 	return User{ID: ID, Version: Version, FullName: FullName, PhoneNumber: PhoneNumber}
 }

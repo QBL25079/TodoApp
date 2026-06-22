@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	core_logger "github.com/QBL25079/TodoApp/internal/core/logger"
+	core_http_utils "github.com/QBL25079/TodoApp/internal/core/transport/http/request"
 	core_http_response "github.com/QBL25079/TodoApp/internal/core/transport/http/response"
-	core_http_utils "github.com/QBL25079/TodoApp/internal/core/transport/http/utils"
 )
 
 func (h *UsersHTTPHandler) DeleteUser(rw http.ResponseWriter, r *http.Request) {
@@ -24,6 +24,6 @@ func (h *UsersHTTPHandler) DeleteUser(rw http.ResponseWriter, r *http.Request) {
 		responseHandler.ErrorResponse(err, "failed to delete user")
 		return
 	}
-	
+
 	responseHandler.NoContentResponse()
 }
