@@ -23,15 +23,15 @@ func NewUserUninitialized(fullName string, phoneNumber *string) User {
 }
 
 func (u *User) Validate() error {
-	fullNameLength := len([]rune(u.FullName))
+	fullNameLen := len([]rune(u.FullName))
 
-	if fullNameLength < 3 || fullNameLength > 100 {
-		return fmt.Errorf("invalid fullname length %d: %w", fullNameLength, core_errors.ErrInvalidArgument)
+	if fullNameLen < 3 || fullNameLen > 100 {
+		return fmt.Errorf("invalid fullname length %d: %w", fullNameLen, core_errors.ErrInvalidArgument)
 	}
 	if u.PhoneNumber != nil {
 		PhoneNumberLen := len([]rune(*u.PhoneNumber))
 		if PhoneNumberLen < 10 || PhoneNumberLen > 15 {
-			return fmt.Errorf("invalid phone number length %d: %w", fullNameLength, core_errors.ErrInvalidArgument)
+			return fmt.Errorf("invalid phone number length %d: %w", fullNameLen, core_errors.ErrInvalidArgument)
 		}
 
 		re := regexp.MustCompile(`^\+[0-9]+$`)
