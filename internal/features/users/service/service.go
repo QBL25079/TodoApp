@@ -18,10 +18,6 @@ type UsersRepository interface {
 	PatchUser(ctx context.Context, id int, user domain.User) (domain.User, error)
 }
 
-func NewUsersRepository(usersRepository UsersRepository) *UsersService {
-	return &UsersService{usersRepository: usersRepository}
-}
-
 func NewUserService(userRepository UsersRepository) *UsersService {
 	return &UsersService{usersRepository: userRepository}
 }

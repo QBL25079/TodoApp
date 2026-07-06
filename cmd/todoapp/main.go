@@ -11,6 +11,9 @@ import (
 	core_pgx_pool "github.com/QBL25079/TodoApp/internal/core/repository/postgres/pool/pgx"
 	core_http_middleware "github.com/QBL25079/TodoApp/internal/core/transport/http/middleware"
 	core_http_server "github.com/QBL25079/TodoApp/internal/core/transport/http/server"
+	task_postgres_repo "github.com/QBL25079/TodoApp/internal/features/tasks/repository/postgres"
+	task_service "github.com/QBL25079/TodoApp/internal/features/tasks/service"
+	task_transport_http "github.com/QBL25079/TodoApp/internal/features/tasks/transport/http"
 	users_postgres_repo "github.com/QBL25079/TodoApp/internal/features/users/repository/postgres"
 	user_service "github.com/QBL25079/TodoApp/internal/features/users/service"
 	user_transport_http "github.com/QBL25079/TodoApp/internal/features/users/transport/http"
@@ -33,7 +36,7 @@ func main() {
 	logger.Debug("initializing connection pool")
 	pool, err := core_pgx_pool.NewPool(ctx, core_pgx_pool.NewConfigMust())
 	if err != nil {
-		logger.Fatal("failed to init postgres connection pool", zap.Error(err)) 
+		logger.Fatal("failed to init postgres connection pool", zap.Error(err))
 	}
 
 	defer pool.Close()
@@ -43,13 +46,20 @@ func main() {
 	userService := user_service.NewUserService(usersRepository)
 	usersTransportHTTP := user_transport_http.NewUsersHTTPHandler(userService)
 
+	logger.Debug("Initializing feature ", zap.String("feature", "tasks"))
+
+	tasksRepository := task_postgres_repo.NewTaskRepository(pool)
+	taskService := task_service.NewTaskService(tasksRepository)
+	tasksTransportHTTP := task_transport_http.NewTaskHTTPHandler(taskService)
+
 	logger.Debug("initializing HTTP server")
 
-	httpServer := core_http_server.NewHTTPServer(core_http_server.NewConfigMust(), logger, core_http_middleware.RequestID(), core_http_middleware.Logger(logger), core_http_middleware.Trace(), core_http_middleware.Panic(),)
+	httpServer := core_http_server.NewHTTPServer(core_http_server.NewConfigMust(), logger, core_http_middleware.RequestID(), core_http_middleware.Logger(logger), core_http_middleware.Trace(), core_http_middleware.Panic())
 
 	apiVersionRouter := core_http_server.NewApiVersionRouter(core_http_server.ApiVersion1)
 
 	apiVersionRouter.RegisterRoutes(usersTransportHTTP.Routes()...)
+	apiVersionRouter.RegisterRoutes(tasksTransportHTTP.Routes()...)
 
 	httpServer.RegisterAPIRouters(apiVersionRouter)
 
