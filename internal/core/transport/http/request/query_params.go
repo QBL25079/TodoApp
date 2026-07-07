@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	core_errors "github.com/QBL25079/TodoApp/internal/core/errors"
 )
@@ -20,4 +21,22 @@ func GetQueryParam(r *http.Request, key string) (*int, error) {
 	}
 
 	return &val, nil
+}
+
+func GetDateQueryParam(r *http.Request, key string) (*time.Time, error) {
+	param := r.URL.Query().Get(key)
+
+	if param == "" {
+		return nil, nil
+	}
+
+	layout := "2006-01-03"
+
+	date, err := time.Parse(layout, param)
+
+	if err != nil {
+		return nil, fmt.Errorf("Param='%s', key='%s' not a valid date", param, key, core_errors.ErrInvalidArgument)
+	}
+
+	return &date, nil
 }

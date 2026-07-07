@@ -11,6 +11,9 @@ import (
 	core_pgx_pool "github.com/QBL25079/TodoApp/internal/core/repository/postgres/pool/pgx"
 	core_http_middleware "github.com/QBL25079/TodoApp/internal/core/transport/http/middleware"
 	core_http_server "github.com/QBL25079/TodoApp/internal/core/transport/http/server"
+	stat_repository "github.com/QBL25079/TodoApp/internal/features/statistics/repository/postgres"
+	stat_service "github.com/QBL25079/TodoApp/internal/features/statistics/service"
+	stat_transport "github.com/QBL25079/TodoApp/internal/features/statistics/transport/http"
 	task_postgres_repo "github.com/QBL25079/TodoApp/internal/features/tasks/repository/postgres"
 	task_service "github.com/QBL25079/TodoApp/internal/features/tasks/service"
 	task_transport_http "github.com/QBL25079/TodoApp/internal/features/tasks/transport/http"
@@ -52,6 +55,12 @@ func main() {
 	taskService := task_service.NewTaskService(tasksRepository)
 	tasksTransportHTTP := task_transport_http.NewTaskHTTPHandler(taskService)
 
+	logger.Debug("Initializing feature ", zap.String("feature", "statistics"))
+
+	statRepository := stat_repository.NewStatRepository(pool)
+	statService := stat_service.NewStatService(statRepository)
+	StatHTTPTransport := stat_transport.NewStatisticsHandler(statService)
+
 	logger.Debug("initializing HTTP server")
 
 	httpServer := core_http_server.NewHTTPServer(core_http_server.NewConfigMust(), logger, core_http_middleware.RequestID(), core_http_middleware.Logger(logger), core_http_middleware.Trace(), core_http_middleware.Panic())
@@ -60,6 +69,7 @@ func main() {
 
 	apiVersionRouter.RegisterRoutes(usersTransportHTTP.Routes()...)
 	apiVersionRouter.RegisterRoutes(tasksTransportHTTP.Routes()...)
+	apiVersionRouter.RegisterRoutes(StatHTTPTransport.Routes()...)
 
 	httpServer.RegisterAPIRouters(apiVersionRouter)
 
