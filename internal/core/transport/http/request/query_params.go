@@ -35,7 +35,7 @@ func GetDateQueryParam(r *http.Request, key string) (*time.Time, error) {
 	date, err := time.Parse(layout, param)
 
 	if err != nil {
-		return nil, fmt.Errorf("Param='%s', key='%s' not a valid date", param, key, core_errors.ErrInvalidArgument)
+		return nil, fmt.Errorf("Param='%s', key='%s' not a valid date, %w", param, key, core_errors.ErrInvalidArgument)
 	}
 
 	return &date, nil
