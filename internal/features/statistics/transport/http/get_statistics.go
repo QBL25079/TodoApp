@@ -12,10 +12,10 @@ import (
 )
 
 type GetStatResponse struct {
-	CreatedTasks   int
-	CompletedTasks int
-	ComplRate      *float64
-	AvarageTime    *string
+	CreatedTasks   int `json:"created_tasks"`
+	CompletedTasks int	`json:"completed_tasks"`
+	ComplRate      *float64 `json:"compition_rate"`
+	AvarageTime    *string `json:"avavrage_time"`
 }
 
 func toDTOFromDomain(stat domain.Statistics) GetStatResponse {
