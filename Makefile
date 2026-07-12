@@ -36,6 +36,8 @@ migrate-action:
 todoapp-run:
 	$$env:POSTGRES_HOST = "localhost"; $$env:POSTGRES_PORT = "5433"; $$env:POSTGRES_DATABASE = "${POSTGRES_DB}"; $$env:POSTGRES_USER = "${POSTGRES_USER}"; $$env:POSTGRES_PASSWORD = "${POSTGRES_PASSWORD}"; $$env:POSTGRES_TIMEOUT = "${POSTGRES_TIMEOUT}"; go mod tidy; go run cmd/todoapp/main.go
 
+todoapp-undeploy:
+	@docker compose down todoapp
 
 todoapp-deploy:
 	@docker compose up -d --build todoapp
